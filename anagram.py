@@ -19,7 +19,7 @@ def warn(message):
 warn("initializing dictionary...")
 dictionary = open(options.dictionary).read().split("\n")
 anagrams = collections.defaultdict(list)
-key_for = lambda word: str(sorted(word))
+key_for = lambda word: "".join(sorted(word))
 for word in dictionary:
     anagrams[key_for(word)].append(word)
 warn("done\n")
