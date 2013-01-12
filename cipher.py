@@ -5,6 +5,7 @@ import optparse
 import collections, itertools
 import random
 import string
+import math
 
 parser = optparse.OptionParser()
 parser.add_option("-d", "--dictionary")
@@ -57,6 +58,10 @@ def scramble(sentence):
 def split(sentence):
     return re.sub("[^a-z ]", "", sentence).split()
 
+def count_combinations(n, r):
+    f = math.factorial
+    return f(n)/(f(r)*f(n-r))
+
 def solve(original_scrambled):
     original_scrambled = original_scrambled.lower()
     scrambled = split(original_scrambled)
@@ -78,7 +83,7 @@ def solve(original_scrambled):
     # "the time has come the walrus said to talk of many things.  of shores and ships and sealing wax, of cabbages and kings.  carroll"
 
     # eliminate any impossible words
-    compromized_indexes = set(i for (i, partial_keys) in enumerate(partial_keys_list) if len(partial_keys) == 0)
+    partial_keys_list = [partial_keys for partial_keys in partial_keys_list if len(partial_keys) != 0]
     # this test case has immediately impossible words:
     # "when on a music staff, ff for fortissimo means very loud, much like mournful howls voiced by frustrated solvers."
 
@@ -115,29 +120,30 @@ def solve(original_scrambled):
                 continue
             for result in recurse(combined_key, index+1, progress_step):
                 yield result
-    def announce_compromizes():
+    def announce_compromizes(compromizes):
         if not options.verbose: return
-        if not compromized_indexes: return
-        compromizes = len(compromized_indexes)
+        if compromizes == 0: return
         say("leaving out {0} word{1}.".format(compromizes, "s"[0:bool(compromizes - 1)]))
     answer_set = set()
-    while len(compromized_indexes) < len(partial_keys_list):
+    for omission_count in range(len(partial_keys_list)):
+        announce_compromizes(len(scrambled) - len(partial_keys_list) + omission_count)
+        combination_count = count_combinations(len(partial_keys_list), omission_count)
         progress = [0]
-        announce_compromizes()
-        answer_keys = recurse({}, 0, 1.0)
+        # try leaving out random words (starting by including them all)
+        for omissions in itertools.combinations(range(len(partial_keys_list)), omission_count):
+            compromized_indexes = set(omissions)
+            significance = 1.0/combination_count
+            answer_keys = recurse({}, 0, significance)
 
-        for answer_key in answer_keys:
-            answer = "".join(answer_key.get(c, c) for c in original_scrambled)
-            if answer not in answer_set:
-                say(answer)
-                answer_set.add(answer)
+            for answer_key in answer_keys:
+                answer = "".join(answer_key.get(c, c) for c in original_scrambled)
+                if answer not in answer_set:
+                    say(answer)
+                    answer_set.add(answer)
 
         if answer_set:
             clear_progress()
             break
-        else:
-            # try leaving out random words
-            TODO
 
 if options.generate:
     sentence = " ".join(args)
