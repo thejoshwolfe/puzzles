@@ -73,14 +73,11 @@ def solve(original_scrambled):
         by_signature[get_signature(word)].append(word)
 
     # starting with words with the most letters results in smoother progress
-    if options.verbose:
-        scrambled.sort(key=lambda word: -max(get_signature(word)))
+    scrambled.sort(key=lambda word: -max(get_signature(word)))
     partial_keys_list = [[dict(zip(scrambled_word, real_word)) for real_word in by_signature[get_signature(scrambled_word)]] for scrambled_word in scrambled]
-    # starting with words with the fewest possibilites results in fastest solve time
-    if not options.verbose:
-        partial_keys_list.sort(key=len)
-    # this is the test case used to measure performance:
+    # here are some performance-intensive test caess:
     # "the time has come the walrus said to talk of many things.  of shores and ships and sealing wax, of cabbages and kings.  carroll"
+    # "even adam and eve had their problems, one day he said to her: 'darn it, you have put my shirt in the salad again'."
 
     # eliminate any impossible words
     partial_keys_list = [partial_keys for partial_keys in partial_keys_list if len(partial_keys) != 0]
