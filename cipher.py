@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+"""
+this will generate puzzles for this program:
+  http://cryptogram.org/solve_cipher.html
+"""
+
 import sys, re
 import optparse
 import collections, itertools
